@@ -8,7 +8,7 @@ const express = require('express');
 const app = express();
 
 app.use(cors())
-app.use(morgan())
+app.use(morgan('combined'))
 
 const port = process.env.PORT || 3000   
 
@@ -21,8 +21,14 @@ app.get('/users/:user', async(req, res) =>{
     res.send(data)
 })
 
+app.get('/users', async(req, res) => {
+    const users = await db.get_users()
+    console.log(users)
+    res.send(users)
+})
+
 // Change password
-app.put('/users/rol/:user', async(req, res) =>{
+app.put('/users/role/:user', async(req, res) =>{
     const {username,new_password} = JSON.parse(req.params.user)
     const data = await db.change_password(username,new_password)
     console.log(data)
@@ -30,7 +36,7 @@ app.put('/users/rol/:user', async(req, res) =>{
 })
 
 
-// Change password
+// Change role
 app.put('/users/password/:user', async(req, res) =>{
     const {username,new_role} = JSON.parse(req.params.user)
     const data = await db.change_rol(username,new_role)
@@ -39,14 +45,15 @@ app.put('/users/password/:user', async(req, res) =>{
 })
 
 //Create a new user
-app.post('/users/set/:user', async(req, res) =>{
-    const {username,password,name,surname,email,birthdate,rol} = JSON.parse(req.params.user)
-    const data = await db.set_user(username,password,name,surname,email,birthdate,rol)
+app.post('/users/:user', async(req, res) =>{
+    const {name,surname,email,birthdate,role} = JSON.parse(req.params.user)
+    const username = name[0] + surname + birthdate.slice(0,4)
+    const data = await db.create_user(username,name,surname,email,birthdate,role)
     console.log(data)
     res.send(data)
 })
 
 
 app.listen(port, ()=>{
-    console.log(`listening on port ${process.env.PORT}`)
+    console.log(`listening on port ${port}`)
 })

@@ -17,7 +17,6 @@ const port = process.env.PORT || 3000
 app.get('/users/:user', async(req, res) =>{
     const {username,password} = JSON.parse(req.params.user)
     const data = await db.get_user(username,password)
-    console.log(data)
     res.send(data)
 })
 
@@ -51,6 +50,12 @@ app.post('/users/:user', async(req, res) =>{
     const data = await db.create_user(username,name,surname,email,birthdate,role)
     console.log(data)
     res.send(data)
+})
+app.put('/users/:data',async (req,res) => {
+    const {username,new_password} = JSON.parse(req.params.data)
+    await db.change_password(username,new_password)
+    const user = await db.get_user(username,new_password)
+    res.send(user)
 })
 
 

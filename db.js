@@ -11,14 +11,13 @@ const pool = new Pool({
 })
 
 const get_user = async(username,password) =>{
-    const user = await pool.query(`SELECT * FROM users WHERE username='${username}' AND password='${md5(password)}'`)
+    const user = await pool.query(`SELECT us.id_user,us.username,us.password,us.name,us.surname,us.email,us.birthdate,ro.role_name FROM users us, roles ro WHERE us.username='${username}' AND us.password='${md5(password)}' AND us.role = ro.id_role `)
     return user.rows[0]
 }
 
 const change_password = async(username,new_password) =>{
-    const res = await pool.query(`UPDATE users SET password='${new_password}' WHERE username='${username}'`)
-    console.log(res.rowCount)
-    return res.rowCount
+    const res = await pool.query(`UPDATE users SET password='${md5(new_password)}' WHERE username='${username}'`)
+    return res
 }
 
 const change_rol = async(username,new_role) =>{
@@ -27,7 +26,7 @@ const change_rol = async(username,new_role) =>{
 }
 
 const get_users = async() =>{
-    const res = await pool.query(`SELECT id_user,username,name,surname,email,role FROM users`)
+    const res = await pool.query(`SELECT us.id_user,us.username,us.password,us.name,us.surname,us.email,us.birthdate,ro.role_name FROM users us, roles ro WHERE us.role = ro.id_role`)
     console.log(res.rows)
     return res.rows
 }
@@ -54,6 +53,7 @@ const get_activities = async(state) =>{
 const get_activities_by = async(state) =>{
     const activities = await pool.query(`SELECT * FROM activities`)
 }
+
 
 
 

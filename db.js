@@ -10,12 +10,13 @@ const pool = new Pool({
     database: process.env.DATABASE
 })
 
-const get_user = async(username,password) =>{
-    const user = await pool.query(`SELECT us.id_user,us.username,us.password,us.name,us.surname,us.email,us.birthdate,ro.role_name FROM users us, roles ro WHERE us.username='${username}' AND us.password='${md5(password)}' AND us.role = ro.id_role `)
+const getUser = async(username,password) =>{
+    const user = await pool.query(`SELECT  us.id_user, us.name,us.surname, us.email, us.username, ro.role_description,ar.area_description FROM users us, roles ro, areas ar WHERE us.username = '${username}' AND us.password='${md5(password)}' AND us.id_area = ar.id_area AND us.id_role = ro.id_role`)
+    // const user = await pool.query(`SELECT us.id_user,us.username,us.password,us.name,us.surname,us.email,us.birthdate,ro.role_name FROM users us, roles ro WHERE us.username='${username}' AND us.password='${md5(password)}' AND us.role = ro.id_role `)
     return user.rows[0]
 }
 
-const change_password = async(username,new_password) =>{
+const changePassword = async(username,new_password) =>{
     const res = await pool.query(`UPDATE users SET password='${md5(new_password)}' WHERE username='${username}'`)
     return res
 }
@@ -25,8 +26,8 @@ const change_rol = async(username,new_role) =>{
     return res.rowCount
 }
 
-const get_users = async() =>{
-    const res = await pool.query(`SELECT us.id_user,us.username,us.password,us.name,us.surname,us.email,us.birthdate,ro.role_name FROM users us, roles ro WHERE us.role = ro.id_role`)
+const getUsers = async() =>{
+    const res = await pool.query(`SELECT  us.id_user,us.name,us.surname, us.email, us.username, ro.role_description,ar.area_description FROM users us, roles ro, areas ar WHERE us.id_area = ar.id_area AND us.id_role = ro.id_role`)
     console.log(res.rows)
     return res.rows
 }
@@ -40,8 +41,8 @@ const create_activity = async()=>{
 
 }
 
-const create_user = async(username,name,surname,email,birthdate,role)=>{
-    const query = await pool.query(`INSERT INTO users (username,password,name,surname,email,birthdate,role) VALUES ('${username}','${md5(username)}','${name}','${surname}','${email}','${birthdate}','${role}')`)
+const createUser = async(username,name,surname,email,role,area)=>{
+    const query = await pool.query(`INSERT INTO users (username,password,name,surname,email,id_role,id_area) VALUES ('${username}','${md5(username)}','${name}','${surname}','${email}','${role}','${area}')`)
     return query
 }
 
@@ -54,17 +55,21 @@ const get_activities_by = async(state) =>{
     const activities = await pool.query(`SELECT * FROM activities`)
 }
 
+const getAreas = async() => {
+    const areas = await pool.query('SELECT * FROM areas')
+    return areas.rows
 
-
+}
 
 module.exports = {
-    get_user,
-    get_users,
-    change_password,
+    getUser,
+    getUsers,
+    changePassword,
     change_rol,
     create_activity,
-    create_user,
+    createUser,
     get_activities,
     get_activities_by,
-    get_users_by
+    get_users_by,
+    getAreas
 }

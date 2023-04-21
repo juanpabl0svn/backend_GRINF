@@ -26,6 +26,27 @@ app.get('/users', async(req, res) => {
     res.send(users)
 })
 
+app.get('/colab',async(req, res) => {
+    const users = await db.getColab()
+    console.log(users)
+    res.send(users)
+
+})
+
+app.post('/activity/:data',async(req, res) => {
+    const {title,mandated,description,relevance,date_start,date_end} = JSON.parse(req.params.data)
+    const activity = await db.createActivity(title,mandated,description,relevance,date_start,date_end)
+    res.send(activity)
+})
+
+app.get('/activity',async(req,res)=>{
+    const activities = await db.getActivities()
+    console.log(activities)
+    res.send(activities)
+
+})
+
+
 // Change password
 app.put('/users/role/:user', async(req, res) =>{
     const {username,new_password} = JSON.parse(req.params.user)
@@ -53,7 +74,7 @@ app.post('/users/:user', async(req, res) =>{
 app.put('/users/:data',async (req,res) => {
     const {username,new_password} = JSON.parse(req.params.data)
     await db.changePassword(username,new_password)
-    const user = await db.get_user(username,new_password)
+    const user = await db.getUser(username,new_password)
     res.send(user)
 })
 

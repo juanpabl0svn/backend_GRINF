@@ -51,14 +51,13 @@ CREATE TABLE IF NOT EXISTS ACTIVITIES (
 	activity_title VARCHAR (50) NOT NULL,
 	activity_description TEXT NOT NULL,
 	activity_mandated INT REFERENCES USERS(id_user),
-	id_area INT REFERENCES AREAS(id_area),
 	relevance INT NOT NULL CHECK (
 		relevance >= 0
 		and relevance <= 5
 	),
 	date_start DATE NOT NULL,
 	date_end DATE NOT NULL,
-	id_state INT REFERENCES STATES(id_state)
+	id_state INT REFERENCES STATES(id_state) DEFAULT 1
 );
 
 CREATE TABLE IF NOT EXISTS GRI(

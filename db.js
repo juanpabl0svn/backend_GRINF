@@ -27,17 +27,25 @@ const change_rol = async(username,new_role) =>{
 }
 
 const getUsers = async() =>{
-    const res = await pool.query(`SELECT  us.id_user,us.name,us.surname, us.email, us.username, ro.role_description,ar.area_description FROM users us, roles ro, areas ar WHERE us.id_area = ar.id_area AND us.id_role = ro.id_role`)
+    const res = await pool.query(`SELECT  us.id_user,us.name,us.surname, us.email, us.username, ro.role_description,ar.area_description FROM users us, roles ro, areas ar WHERE us.id_area = ar.id_area AND us.id_role = ro.id_role ORDER BY us.name`)
     console.log(res.rows)
     return res.rows
 }
 
-const get_users_by = async({id,username,name,surname,email,role}) =>{
-    const res = await pool.query(`SELECT id_user,username,name,surname,email,role FROM users WHERE username`)
+
+const getColab = async() => {
+    const res = await pool.query("SELECT id_user,INITCAP(CONCAT (name, ' ', surname)) AS full_name FROM users WHERE id_role = 3 ORDER BY full_name")
     return res.rows
 }
 
-const create_activity = async()=>{
+const get_users_by = async({id,username,name,surname,email,role}) =>{
+    const res = await pool.query(`SELECT id_user,username,name,surname,email,role FROM users WHERE username ORDER BY name`)
+    return res.rows
+}
+
+const createActivity = async(title,mandated,description,relevance,date_start,date_end) => {
+    const res = await pool.query(`INSERT INTO activities (activity_title,activity_description,activity_mandated,relevance,date_start,date_end) VALUES ('${title}','${description}',${mandated},${relevance},'${date_start}','${date_end}')`)
+    return res
 
 }
 
@@ -47,8 +55,9 @@ const createUser = async(username,name,surname,email,role,area)=>{
 }
 
 
-const get_activities = async(state) =>{
-    const activities = await pool.query(`SELECT * FROM activities WHERE state=${state}`)
+const getActivities = async() =>{
+    const activities = await pool.query(`SELECT ac.id_activity,ac.activity_title,ac.activity_description,INITCAP(CONCAT (us.name, ' ', us.surname)) AS full_name,ac.relevance,ac.date_start,ac.date_end,st.state_description from activities ac, users us, states st where ac.activity_mandated = us.id_user AND ac.id_state = st.id_state ORDER BY ac.activity_title`)
+    return activities.rows
 }
 
 const get_activities_by = async(state) =>{
@@ -66,10 +75,11 @@ module.exports = {
     getUsers,
     changePassword,
     change_rol,
-    create_activity,
+    createActivity,
     createUser,
-    get_activities,
+    getActivities,
     get_activities_by,
     get_users_by,
-    getAreas
+    getAreas,
+    getColab
 }

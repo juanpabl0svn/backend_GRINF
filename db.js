@@ -11,7 +11,7 @@ const pool = new Pool({
 })
 
 const getUser = async(username,password) =>{
-    const user = await pool.query(`SELECT  us.id_user, us.name,us.surname, us.email, us.username, ro.role_description,ar.area_description FROM users us, roles ro, areas ar WHERE us.username = '${username}' AND us.password='${md5(password)}' AND us.id_area = ar.id_area AND us.id_role = ro.id_role`)
+    const user = await pool.query(`SELECT  us.id_user, us.name,us.surname, us.email, us.username, ro.role_description,ar.area_description,us.id_area FROM users us, roles ro, areas ar WHERE us.username = '${username}' AND us.password='${md5(password)}' AND us.id_area = ar.id_area AND us.id_role = ro.id_role`)
     // const user = await pool.query(`SELECT us.id_user,us.username,us.password,us.name,us.surname,us.email,us.birthdate,ro.role_name FROM users us, roles ro WHERE us.username='${username}' AND us.password='${md5(password)}' AND us.role = ro.id_role `)
     return user.rows[0]
 }
@@ -27,14 +27,13 @@ const change_rol = async(username,new_role) =>{
 }
 
 const getUsers = async() =>{
-    const res = await pool.query(`SELECT  us.id_user,us.name,us.surname, us.email, us.username, ro.role_description,ar.area_description FROM users us, roles ro, areas ar WHERE us.id_area = ar.id_area AND us.id_role = ro.id_role ORDER BY us.name`)
+    const res = await pool.query(`SELECT  us.id_user,us.name,us.surname, us.email, us.username, ro.role_description,ar.area_description,us.id_role,us.id_area FROM users us, roles ro, areas ar WHERE us.id_area = ar.id_area AND us.id_role = ro.id_role ORDER BY us.name`)
     console.log(res.rows)
     return res.rows
 }
 
-
-const getColab = async() => {
-    const res = await pool.query("SELECT id_user,INITCAP(CONCAT (name, ' ', surname)) AS full_name FROM users WHERE id_role = 3 ORDER BY full_name")
+const getColab = async(id_area) => {
+    const res = await pool.query(`SELECT id_user,INITCAP(CONCAT (name, ' ', surname)) AS full_name FROM users WHERE id_role = 3 AND id_area = ${id_area} ORDER BY full_name`)
     return res.rows
 }
 
@@ -44,8 +43,12 @@ const get_users_by = async({id,username,name,surname,email,role}) =>{
 }
 
 const createActivity = async(title,mandated,description,relevance,date_start,date_end) => {
-    const res = await pool.query(`INSERT INTO activities (activity_title,activity_description,activity_mandated,relevance,date_start,date_end) VALUES ('${title}','${description}',${mandated},${relevance},'${date_start}','${date_end}')`)
-    return res
+    try{
+        const res = await pool.query(`INSERT INTO activities (activity_title,activity_description,activity_mandated,relevance,date_start,date_end) VALUES ('${title}','${description}',${mandated},${relevance},'${date_start}','${date_end}')`)
+        return res
+    }catch(e){
+        return e
+    }
 
 }
 
@@ -56,7 +59,7 @@ const createUser = async(username,name,surname,email,role,area)=>{
 
 
 const getActivities = async() =>{
-    const activities = await pool.query(`SELECT ac.id_activity,ac.activity_title,ac.activity_description,INITCAP(CONCAT (us.name, ' ', us.surname)) AS full_name,ac.relevance,ac.date_start,ac.date_end,st.state_description from activities ac, users us, states st where ac.activity_mandated = us.id_user AND ac.id_state = st.id_state ORDER BY ac.activity_title`)
+    const activities = await pool.query(`SELECT ac.id_activity,ac.activity_title,ac.activity_description,INITCAP(CONCAT (us.name, ' ', us.surname)) AS full_name,ac.relevance, to_char(ac.date_start,'YYYY/MM/DD') as date_start,to_char(ac.date_end,'YYYY/MM/DD') as date_end,st.state_description from activities ac, users us, states st where ac.activity_mandated = us.id_user AND ac.id_state = st.id_state ORDER BY ac.activity_title`)
     return activities.rows
 }
 
@@ -70,6 +73,12 @@ const getAreas = async() => {
 
 }
 
+
+const updateUser = async(id_user,username,name,surname,email,id_role,id_area) => {
+    const query = await pool.query(`UPDATE users SET name ='${name}', surname ='${surname}', email ='${email}', id_role =${id_role} , id_area=${id_area}, username='${username}' WHERE id_user = ${id_user}`)
+    return query
+}
+
 module.exports = {
     getUser,
     getUsers,
@@ -81,5 +90,6 @@ module.exports = {
     get_activities_by,
     get_users_by,
     getAreas,
-    getColab
+    getColab,
+    updateUser
 }

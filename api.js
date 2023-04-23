@@ -26,8 +26,16 @@ app.get('/users', async(req, res) => {
     res.send(users)
 })
 
-app.get('/colab',async(req, res) => {
-    const users = await db.getColab()
+app.put('/users/:user', async(req, res) => {
+    const {id_user,username,name,surname,email,id_role,id_area} = JSON.parse(req.params.user)
+    const query = await db.updateUser(id_user,username,name,surname,email,id_role,id_area)
+    console.log(query)
+    res.send(query)
+})
+
+app.get('/colab/:area',async(req, res) => {
+    const area = req.params.area
+    const users = await db.getColab(area)
     console.log(users)
     res.send(users)
 
@@ -71,7 +79,8 @@ app.post('/users/:user', async(req, res) =>{
     const data = await db.createUser(username,name.toLowerCase(),surname.toLowerCase(),email.toLowerCase(),role,area)
     res.send(data)
 })
-app.put('/users/:data',async (req,res) => {
+
+app.put('/password/:data',async (req,res) => {
     const {username,new_password} = JSON.parse(req.params.data)
     await db.changePassword(username,new_password)
     const user = await db.getUser(username,new_password)
@@ -83,6 +92,7 @@ app.get('/areas',async (req,res) =>{
     console.log(areas)
     res.send(areas)
 })
+
 
 app.listen(port, ()=>{
     console.log(`listening on port ${port}`)

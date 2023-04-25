@@ -116,6 +116,21 @@ const updateUser = async (
   return query;
 };
 
+const updateActivity = async (
+  id_activity,
+  activity_title,
+  activity_description,
+  activity_mandated,
+  relevance,
+  date_end,
+  id_state
+) => {
+  const query = await pool.query(
+    `UPDATE activities SET activity_title = '${activity_title}', activity_description = '${activity_description}', activity_mandated = ${activity_mandated}, relevance = ${relevance}, date_end = '${date_end}', id_state = ${id_state} WHERE id_activity = ${id_activity}`
+  );
+  return query;
+};
+
 module.exports = {
   getUser,
   getUsers,
@@ -129,4 +144,5 @@ module.exports = {
   getAreas,
   getColab,
   updateUser,
+  updateActivity,
 };

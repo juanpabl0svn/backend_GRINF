@@ -112,6 +112,30 @@ app.get("/areas", async (req, res) => {
   res.send(areas);
 });
 
+app.put("/activity/:new_activity", async (req, res) => {
+  console.log(req.params.new_activity);
+  const {
+    id_activity,
+    activity_title,
+    activity_mandated,
+    relevance,
+    activity_description,
+    date_end,
+    id_state,
+  } = JSON.parse(req.params.new_activity);
+  const query = await db.updateActivity(
+    id_activity,
+    activity_title,
+    activity_description,
+    activity_mandated,
+    relevance,
+    date_end,
+    id_state
+  );
+  console.log(query)
+  res.send(query);
+});
+
 app.listen(port, () => {
   console.log(`listening on port ${port}`);
 });

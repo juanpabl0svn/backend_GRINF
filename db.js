@@ -64,12 +64,14 @@ const createActivity = async (
   description,
   relevance,
   date_start,
-  date_end
+  date_end,
+  id_area
 ) => {
   try {
     const res = await pool.query(
-      `INSERT INTO activities (activity_title,activity_description,activity_mandated,relevance,date_start,date_end) VALUES ('${title}','${description}',${mandated},${relevance},'${date_start}','${date_end}')`
+      `INSERT INTO activities (activity_title,activity_description,activity_mandated,relevance,date_start,date_end,id_area) VALUES ('${title}','${description}',${mandated},${relevance},'${date_start}','${date_end}',${id_area})`
     );
+    console.log('Dios mio')
     return res;
   } catch (e) {
     return e;
@@ -87,13 +89,25 @@ const createUser = async (username, name, surname, email, role, area) => {
 
 const getActivities = async () => {
   const activities = await pool.query(
-    `SELECT ac.id_activity,ac.activity_title,ac.activity_description,INITCAP(CONCAT (us.name, ' ', us.surname)) AS full_name,ac.relevance, to_char(ac.date_start,'YYYY/MM/DD') as date_start,to_char(ac.date_end,'YYYY/MM/DD') as date_end,st.state_description, ac.activity_mandated, st.id_state from activities ac, users us, states st where ac.activity_mandated = us.id_user AND ac.id_state = st.id_state ORDER BY ac.activity_title`
+    `SELECT ac.id_activity,ac.activity_title,ac.activity_description,INITCAP(CONCAT (us.name, ' ', us.surname)) AS full_name,ac.relevance, to_char(ac.date_start,'YYYY/MM/DD') as date_start,to_char(ac.date_end,'YYYY/MM/DD') as date_end,st.state_description, ac.activity_mandated, st.id_state FROM activities ac, users us, states st where ac.activity_mandated = us.id_user AND ac.id_state = st.id_state ORDER BY ac.activity_title`
   );
+  console.log(activities)
   return activities.rows;
 };
 
-const get_activities_by = async (state) => {
-  const activities = await pool.query(`SELECT * FROM activities`);
+const getActivitiesByIdUser = async (id_user) => {
+  const activities =
+    await pool.query(`SELECT id_activity,activity_title,activity_mandated FROM activities WHERE activity_mandated = ${id_user} ORDER BY activity_title
+  `);
+  return activities.rows;
+};
+
+const getActivitiesByIdArea = async (id_area) => {
+  const activities =
+    await pool.query(`SELECT ac.id_activity,ac.activity_title,ac.activity_description,INITCAP(CONCAT (us.name, ' ', us.surname)) AS full_name,ac.relevance, to_char(ac.date_start,'YYYY/MM/DD') as date_start,to_char(ac.date_end,'YYYY/MM/DD') as date_end,st.state_description, ac.activity_mandated, st.id_state FROM activities ac, users us, states st WHERE ac.id_area = ${id_area} AND ac.activity_mandated = us.id_user AND ac.id_state = st.id_state ORDER BY ac.activity_title
+    `);
+
+  return activities.rows;
 };
 
 const getAreas = async () => {
@@ -139,10 +153,11 @@ module.exports = {
   createActivity,
   createUser,
   getActivities,
-  get_activities_by,
+  getActivitiesByIdUser,
   get_users_by,
   getAreas,
   getColab,
   updateUser,
   updateActivity,
+  getActivitiesByIdArea
 };

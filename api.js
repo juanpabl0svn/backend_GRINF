@@ -90,13 +90,17 @@ app.post("/activity/:data", async (req, res) => {
   res.send(activity);
 });
 
-// Change password
-app.put("/users/role/:user", async (req, res) => {
-  const { username, new_password } = JSON.parse(req.params.user);
-  const data = await db.change_password(username, new_password);
-  console.log(data);
-  res.send(data);
+app.post("/password/:data", async (req, res) => {
+  const { username, new_password } = JSON.parse(req.params.data);
+  const change = await db.changePassword(username, new_password);
+  if (change == 1){
+    const user = await db.getUser(username, new_password);
+    res.send(user);
+  }else{
+    res.sendStatus(400)
+  }
 });
+
 
 app.put("/users/:user", async (req, res) => {
   const { id_user, username, name, surname, email, id_role, id_area } =
@@ -114,20 +118,6 @@ app.put("/users/:user", async (req, res) => {
   res.send(query);
 });
 
-// Change role
-app.put("/users/password/:user", async (req, res) => {
-  const { username, new_role } = JSON.parse(req.params.user);
-  const data = await db.change_rol(username, new_role);
-  console.log(data);
-  res.send(data);
-});
-
-app.put("/password/:data", async (req, res) => {
-  const { username, new_password } = JSON.parse(req.params.data);
-  await db.changePassword(username, new_password);
-  const user = await db.getUser(username, new_password);
-  res.send(user);
-});
 app.put("/activity/:new_activity", async (req, res) => {
   console.log(req.params.new_activity);
   const {

@@ -12,11 +12,10 @@ const pool = new Pool({
 
 const getUser = async (username, password) => {
   const user = await pool.query(
-    `SELECT  us.id_user, us.name,us.surname, us.email, us.username, ro.role_description,ar.area_description,us.id_area FROM users us, roles ro, areas ar WHERE us.username = '${username}' AND us.password='${md5(
+    `SELECT  us.id_user, INITCAP(us.name) as name,INITCAP(us.surname) as surname, us.email, us.username, INITCAP(ro.role_description) as role_description,ar.area_description,us.id_area FROM users us, roles ro, areas ar WHERE us.username = '${username}' AND us.password='${md5(
       password
     )}' AND us.id_area = ar.id_area AND us.id_role = ro.id_role`
   );
-  // const user = await pool.query(`SELECT us.id_user,us.username,us.password,us.name,us.surname,us.email,us.birthdate,ro.role_name FROM users us, roles ro WHERE us.username='${username}' AND us.password='${md5(password)}' AND us.role = ro.id_role `)
   return user.rows[0];
 };
 
@@ -26,7 +25,7 @@ const changePassword = async (username, new_password) => {
       new_password
     )}' WHERE username='${username}'`
   );
-  return res;
+  return res.rowCount;
 };
 
 const change_rol = async (username, new_role) => {
@@ -38,7 +37,7 @@ const change_rol = async (username, new_role) => {
 
 const getUsers = async () => {
   const res = await pool.query(
-    `SELECT  us.id_user,us.name,us.surname, us.email, us.username, ro.role_description,ar.area_description,us.id_role,us.id_area FROM users us, roles ro, areas ar WHERE us.id_area = ar.id_area AND us.id_role = ro.id_role ORDER BY us.name`
+    `SELECT  us.id_user,INITCAP(us.name) as name,INITCAP(us.surname) as surname, us.email, us.username, ro.role_description,ar.area_description,us.id_role,us.id_area FROM users us, roles ro, areas ar WHERE us.id_area = ar.id_area AND us.id_role = ro.id_role ORDER BY us.name`
   );
   console.log(res.rows);
   return res.rows;

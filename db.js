@@ -39,7 +39,7 @@ const getUsers = async () => {
   const res = await pool.query(
     `SELECT  us.id_user,INITCAP(us.name) as name,INITCAP(us.surname) as surname, us.email, us.username, ro.role_description,ar.area_description,us.id_role,us.id_area FROM users us, roles ro, areas ar WHERE us.id_area = ar.id_area AND us.id_role = ro.id_role ORDER BY us.name`
   );
-  console.log(res.rows);
+  // console.log(res.rows);
   return res.rows;
 };
 
@@ -50,12 +50,17 @@ const getColab = async (id_area) => {
   return res.rows;
 };
 
-const get_users_by = async ({ id, username, name, surname, email, role }) => {
-  const res = await pool.query(
-    `SELECT id_user,username,name,surname,email,role FROM users WHERE username ORDER BY name`
+
+const getUsersFilter  = async(filter) => {
+  const query = await pool.query(`SELECT  us.id_user,INITCAP(us.name) as name,INITCAP(us.surname) as surname, us.email, us.username, ro.role_description,ar.area_description,us.id_role,us.id_area 
+	FROM users us
+	JOIN roles as ro using (id_role)
+	JOIN areas as ar using (id_area)
+	WHERE UPPER(us.username) like '%${filter.toUpperCase()}%' ${isNaN(filter) ? ('') : (`OR us.id_user = ${filter}`)}  ORDER BY us.name`
   );
-  return res.rows;
-};
+  console.log(query);
+  return query.rows
+}
 
 const createActivity = async (
   title,
@@ -153,10 +158,10 @@ module.exports = {
   createUser,
   getActivities,
   getActivitiesByIdUser,
-  get_users_by,
   getAreas,
   getColab,
   updateUser,
   updateActivity,
-  getActivitiesByIdArea
+  getActivitiesByIdArea,
+  getUsersFilter
 };

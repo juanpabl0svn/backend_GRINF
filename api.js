@@ -21,9 +21,9 @@ app.get("/users/:user", async (req, res) => {
 
 app.get("/users/filter/:filter", async (req, res) => {
   const filter = req.params.filter;
-  const data  = await db.getUsersFilter(filter)
-  console.log(data)
-  res.send(data)
+  const data = await db.getUsersFilter(filter);
+  console.log(data);
+  res.send(data);
 });
 
 app.get("/users", async (req, res) => {
@@ -48,7 +48,13 @@ app.get("/activity/:user", async (req, res) => {
   console.log("hola");
   const { id_user } = JSON.parse(req.params.user);
   const query = await db.getActivitiesByIdUser(id_user);
+  res.send(query);
+});
 
+app.get("/activity/area/filter/:data", async (req, res) => {
+  const { id_area, filter } = JSON.parse(req.params.data);
+  console.log({ id_area, filter });
+  const query = await db.getActivitiesFilter(id_area, filter);
   res.send(query);
 });
 

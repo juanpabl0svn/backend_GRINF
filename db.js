@@ -12,7 +12,7 @@ const pool = new Pool({
 
 const getUser = async (username, password) => {
   const user = await pool.query(
-    `SELECT  us.id_user, INITCAP(us.name) as name,INITCAP(us.surname) as surname, us.email, us.username, INITCAP(ro.role_description) as role_description,ar.area_description,us.id_area FROM users us, roles ro, areas ar WHERE us.username = '${username}' AND us.password='${md5(
+    `SELECT  us.id_user, INITCAP(us.name) as name,INITCAP(us.surname) as surname, us.email, us.username, INITCAP(ro.role_description) as role_description,INITCAP(ar.area_description) as area_description,us.id_area FROM users us, roles ro, areas ar WHERE us.username = '${username}' AND us.password='${md5(
       password
     )}' AND us.id_area = ar.id_area AND us.id_role = ro.id_role`
   );
@@ -50,17 +50,36 @@ const getColab = async (id_area) => {
   return res.rows;
 };
 
-
-const getUsersFilter  = async(filter) => {
-  const query = await pool.query(`SELECT  us.id_user,INITCAP(us.name) as name,INITCAP(us.surname) as surname, us.email, us.username, ro.role_description,ar.area_description,us.id_role,us.id_area 
+const getUsersFilter = async (filter) => {
+  const query =
+    await pool.query(`SELECT  us.id_user,INITCAP(us.name) as name,INITCAP(us.surname) as surname, us.email, us.username, ro.role_description,ar.area_description,us.id_role,us.id_area 
 	FROM users us
 	JOIN roles as ro using (id_role)
 	JOIN areas as ar using (id_area)
-	WHERE UPPER(us.username) like '%${filter.toUpperCase()}%' ${isNaN(filter) ? ('') : (`OR us.id_user = ${filter}`)}  ORDER BY us.name`
-  );
+	WHERE UPPER(us.username) like '%${filter.toUpperCase()}%' ${
+      isNaN(filter) ? "" : `OR us.id_user = ${filter}`
+    }  ORDER BY us.name`);
   console.log(query);
-  return query.rows
-}
+  return query.rows;
+};
+
+const getActivitiesFilter = async (id_area, filter) => {
+  const query =
+    await pool.query(`SELECT ac.id_activity,INITCAP(ac.activity_title) as activity_title,ac.activity_description,
+    INITCAP(CONCAT (us.name, ' ', us.surname)) AS full_name,ac.relevance, 
+    to_char(ac.date_start,'YYYY/MM/DD') as date_start,
+    to_char(ac.date_end,'YYYY/MM/DD') as date_end,st.state_description, ac.activity_mandated, 
+    st.id_state 
+    FROM activities ac
+    JOIN users AS us ON us.id_user = ac.activity_mandated
+    JOIN states AS st USING (id_state)
+    WHERE ac.id_area = ${id_area} 
+      AND (${
+        isNaN(filter) ? "" : `ac.id_activity = ${filter} OR`
+      } UPPER(ac.activity_title) like '%${filter.toUpperCase()}%')
+    ORDER BY ac.activity_title`);
+  return query.rows;
+};
 
 const createActivity = async (
   title,
@@ -75,7 +94,7 @@ const createActivity = async (
     const res = await pool.query(
       `INSERT INTO activities (activity_title,activity_description,activity_mandated,relevance,date_start,date_end,id_area) VALUES ('${title}','${description}',${mandated},${relevance},'${date_start}','${date_end}',${id_area})`
     );
-    console.log('Dios mio')
+    console.log("Dios mio");
     return res;
   } catch (e) {
     return e;
@@ -93,9 +112,9 @@ const createUser = async (username, name, surname, email, role, area) => {
 
 const getActivities = async () => {
   const activities = await pool.query(
-    `SELECT ac.id_activity,ac.activity_title,ac.activity_description,INITCAP(CONCAT (us.name, ' ', us.surname)) AS full_name,ac.relevance, to_char(ac.date_start,'YYYY/MM/DD') as date_start,to_char(ac.date_end,'YYYY/MM/DD') as date_end,st.state_description, ac.activity_mandated, st.id_state FROM activities ac, users us, states st where ac.activity_mandated = us.id_user AND ac.id_state = st.id_state ORDER BY ac.activity_title`
+    `SELECT ac.id_activity,ac.activity_title,INITCAP(ac.activity_title) as activity_title,INITCAP(CONCAT (us.name, ' ', us.surname)) AS full_name,ac.relevance, to_char(ac.date_start,'YYYY/MM/DD') as date_start,to_char(ac.date_end,'YYYY/MM/DD') as date_end,st.state_description, ac.activity_mandated, st.id_state FROM activities ac, users us, states st where ac.activity_mandated = us.id_user AND ac.id_state = st.id_state ORDER BY ac.activity_title`
   );
-  console.log(activities)
+  console.log(activities);
   return activities.rows;
 };
 
@@ -108,9 +127,16 @@ const getActivitiesByIdUser = async (id_user) => {
 
 const getActivitiesByIdArea = async (id_area) => {
   const activities =
-    await pool.query(`SELECT ac.id_activity,ac.activity_title,ac.activity_description,INITCAP(CONCAT (us.name, ' ', us.surname)) AS full_name,ac.relevance, to_char(ac.date_start,'YYYY/MM/DD') as date_start,to_char(ac.date_end,'YYYY/MM/DD') as date_end,st.state_description, ac.activity_mandated, st.id_state FROM activities ac, users us, states st WHERE ac.id_area = ${id_area} AND ac.activity_mandated = us.id_user AND ac.id_state = st.id_state ORDER BY ac.activity_title
-    `);
-
+    await pool.query(`SELECT ac.id_activity,INITCAP(ac.activity_title) as activity_title,ac.activity_description,
+    INITCAP(CONCAT (us.name, ' ', us.surname)) AS full_name,ac.relevance, 
+    to_char(ac.date_start,'YYYY/MM/DD') as date_start,
+    to_char(ac.date_end,'YYYY/MM/DD') as date_end,st.state_description, ac.activity_mandated, 
+    st.id_state 
+    FROM activities ac
+    JOIN users AS us ON us.id_user = ac.activity_mandated
+    JOIN states AS st USING (id_state)
+    WHERE ac.id_area = ${id_area}
+    ORDER BY ac.activity_title`);
   return activities.rows;
 };
 
@@ -163,5 +189,6 @@ module.exports = {
   updateUser,
   updateActivity,
   getActivitiesByIdArea,
-  getUsersFilter
+  getUsersFilter,
+  getActivitiesFilter,
 };

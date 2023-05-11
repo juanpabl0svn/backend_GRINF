@@ -22,8 +22,8 @@ CREATE TABLE IF NOT EXISTS USERS (
 	id_user SERIAL PRIMARY KEY,
 	name VARCHAR (50) NOT NULL,
 	surname VARCHAR (50) NOT NULL,
-	email VARCHAR (100) NOT NULL,
-	username VARCHAR (70) NOT NULL,
+	email VARCHAR (100) NOT NULL UNIQUE,
+	username VARCHAR (70) NOT NULL UNIQUE,
 	password VARCHAR (200) NOT NULL,
 	id_role INT NOT NULL REFERENCES ROLES(id_role),
 	id_area INT REFERENCES AREAS(id_area)
@@ -54,11 +54,10 @@ CREATE TABLE IF NOT EXISTS unpaid_reasons(
 	unpaid_description VARCHAR(1000)
 );
 
-CREATE TABLE IF NOT EXISTS SUBACTIVITIES(
-	id_subactivity SERIAL PRIMARY KEY,
-	id_activity INT NOT NULL REFERENCES ACTIVITY(id_activity),
+CREATE TABLE IF NOT EXISTS subactivities(
+	cod id_subactivity SERIAL PRIMARY KEY,
+	id_activity INT NOT NULL REFERENCES activities(id_activity),
 	id_user INT NOT NULL REFERENCES USERS(id_user),
-	subactivity_title VARCHAR (50) NOT NULL,
 	subactivity_description TEXT,
 	date_start DATE NOT NULL,
 	date_end DATE,

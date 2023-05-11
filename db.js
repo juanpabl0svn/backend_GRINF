@@ -37,9 +37,8 @@ const change_rol = async (username, new_role) => {
 
 const getUsers = async () => {
   const res = await pool.query(
-    `SELECT  us.id_user,INITCAP(us.name) as name,INITCAP(us.surname) as surname, us.email, us.username, ro.role_description,ar.area_description,us.id_role,us.id_area FROM users us, roles ro, areas ar WHERE us.id_area = ar.id_area AND us.id_role = ro.id_role ORDER BY us.name`
+    `SELECT  us.id_user,INITCAP(us.name) as name,INITCAP(us.surname) as surname, us.email, us.username, INITCAP(ro.role_description) as role_description, INITCAP(ar.area_description) as area_description,us.id_role,us.id_area FROM users us, roles ro, areas ar WHERE us.id_area = ar.id_area AND us.id_role = ro.id_role ORDER BY us.name`
   );
-  // console.log(res.rows);
   return res.rows;
 };
 
@@ -59,7 +58,6 @@ const getUsersFilter = async (filter) => {
 	WHERE UPPER(us.username) like '%${filter.toUpperCase()}%' ${
       isNaN(filter) ? "" : `OR us.id_user = ${filter}`
     }  ORDER BY us.name`);
-  console.log(query);
   return query.rows;
 };
 
@@ -68,7 +66,7 @@ const getActivitiesFilter = async (id_area, filter) => {
     await pool.query(`SELECT ac.id_activity,INITCAP(ac.activity_title) as activity_title,ac.activity_description,
     INITCAP(CONCAT (us.name, ' ', us.surname)) AS full_name,ac.relevance, 
     to_char(ac.date_start,'YYYY/MM/DD') as date_start,
-    to_char(ac.date_end,'YYYY/MM/DD') as date_end,st.state_description, ac.activity_mandated, 
+    to_char(ac.date_end,'YYYY/MM/DD') as date_end,INITCAP(st.state_description) as state_description, ac.activity_mandated, 
     st.id_state 
     FROM activities ac
     JOIN users AS us ON us.id_user = ac.activity_mandated
@@ -94,7 +92,6 @@ const createActivity = async (
     const res = await pool.query(
       `INSERT INTO activities (activity_title,activity_description,activity_mandated,relevance,date_start,date_end,id_area) VALUES ('${title}','${description}',${mandated},${relevance},'${date_start}','${date_end}',${id_area})`
     );
-    console.log("Dios mio");
     return res;
   } catch (e) {
     return e;
@@ -114,7 +111,6 @@ const getActivities = async () => {
   const activities = await pool.query(
     `SELECT ac.id_activity,ac.activity_title,INITCAP(ac.activity_title) as activity_title,INITCAP(CONCAT (us.name, ' ', us.surname)) AS full_name,ac.relevance, to_char(ac.date_start,'YYYY/MM/DD') as date_start,to_char(ac.date_end,'YYYY/MM/DD') as date_end,st.state_description, ac.activity_mandated, st.id_state FROM activities ac, users us, states st where ac.activity_mandated = us.id_user AND ac.id_state = st.id_state ORDER BY ac.activity_title`
   );
-  console.log(activities);
   return activities.rows;
 };
 
@@ -130,7 +126,7 @@ const getActivitiesByIdArea = async (id_area) => {
     await pool.query(`SELECT ac.id_activity,INITCAP(ac.activity_title) as activity_title,ac.activity_description,
     INITCAP(CONCAT (us.name, ' ', us.surname)) AS full_name,ac.relevance, 
     to_char(ac.date_start,'YYYY/MM/DD') as date_start,
-    to_char(ac.date_end,'YYYY/MM/DD') as date_end,st.state_description, ac.activity_mandated, 
+    to_char(ac.date_end,'YYYY/MM/DD') as date_end,INITCAP(st.state_description) as state_description, ac.activity_mandated, 
     st.id_state 
     FROM activities ac
     JOIN users AS us ON us.id_user = ac.activity_mandated
@@ -140,8 +136,29 @@ const getActivitiesByIdArea = async (id_area) => {
   return activities.rows;
 };
 
+const newSubactivity = async (
+  id_user,
+  id_activity,
+  description,
+  date_start,
+  date_end,
+  time_worked,
+  paid_time
+) => {
+  const query = await pool.query(`INSERT INTO
+  subactivities (id_user,id_activity,subactivity_description,date_start,date_end,time_worked,paid_time,unpaid_time)
+  VALUES ('${id_user}','${id_activity}','${description}','${date_start}','${date_end}',${time_worked},${paid_time},${
+    time_worked - paid_time
+  })`);
+  console.log(query);
+
+  return query.rowCount;
+};
+
 const getAreas = async () => {
-  const areas = await pool.query("SELECT * FROM areas");
+  const areas = await pool.query(
+    "SELECT id_area, INITCAP(area_description) as area_description FROM areas"
+  );
   return areas.rows;
 };
 
@@ -175,6 +192,13 @@ const updateActivity = async (
   return query;
 };
 
+const getDataStatistics = async () => {
+  const query = await pool.query(
+    "SELECT time_worked, paid_time, unpaid_time FROM subactivities "
+  );
+  return query.rows;
+};
+
 module.exports = {
   getUser,
   getUsers,
@@ -191,4 +215,6 @@ module.exports = {
   getActivitiesByIdArea,
   getUsersFilter,
   getActivitiesFilter,
+  newSubactivity,
+  getDataStatistics,
 };

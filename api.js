@@ -22,20 +22,17 @@ app.get("/users/:user", async (req, res) => {
 app.get("/users/filter/:filter", async (req, res) => {
   const filter = req.params.filter;
   const data = await db.getUsersFilter(filter);
-  console.log(data);
   res.send(data);
 });
 
 app.get("/users", async (req, res) => {
   const users = await db.getUsers();
-  // console.log(users);
   res.send(users);
 });
 
 app.get("/colab/:area", async (req, res) => {
   const area = req.params.area;
   const users = await db.getColab(area);
-  console.log(users);
   res.send(users);
 });
 
@@ -45,7 +42,6 @@ app.get("/areas", async (req, res) => {
   res.send(areas);
 });
 app.get("/activity/:user", async (req, res) => {
-  console.log("hola");
   const { id_user } = JSON.parse(req.params.user);
   const query = await db.getActivitiesByIdUser(id_user);
   res.send(query);
@@ -53,7 +49,6 @@ app.get("/activity/:user", async (req, res) => {
 
 app.get("/activity/area/filter/:data", async (req, res) => {
   const { id_area, filter } = JSON.parse(req.params.data);
-  console.log({ id_area, filter });
   const query = await db.getActivitiesFilter(id_area, filter);
   res.send(query);
 });
@@ -69,6 +64,13 @@ app.get("/activity", async (req, res) => {
 
   res.send(activities);
 });
+
+app.get("/data", async (req, res) => {
+  const result = await db.getDataStatistics();
+  console.log(result);
+  res.send(result);
+});
+
 //Create a new user
 app.post("/users/:user", async (req, res) => {
   const { name, surname, email, role, area } = JSON.parse(req.params.user);
@@ -103,7 +105,6 @@ app.post("/activity/:data", async (req, res) => {
     date_end,
     id_area
   );
-  console.log(activity);
   res.send(activity);
 });
 
@@ -115,6 +116,33 @@ app.post("/password/:data", async (req, res) => {
     res.send(user);
   } else {
     res.sendStatus(400);
+  }
+});
+
+app.post("/subactivity/:subactivity", async (req, res) => {
+  const {
+    id_user,
+    id_activity,
+    description,
+    date_start,
+    date_end,
+    time_worked,
+    paid_time,
+  } = JSON.parse(req.params.subactivity);
+
+  const query = await db.newSubactivity(
+    id_user,
+    id_activity,
+    description,
+    date_start,
+    date_end,
+    time_worked,
+    paid_time
+  );
+  if (query) {
+    res.sendStatus(200);
+  } else {
+    res.sendStatus(404);
   }
 });
 
@@ -130,7 +158,6 @@ app.put("/users/:user", async (req, res) => {
     id_role,
     id_area
   );
-  console.log(query);
   res.send(query);
 });
 
@@ -154,7 +181,6 @@ app.put("/activity/:new_activity", async (req, res) => {
     date_end,
     id_state
   );
-  console.log(query);
   res.send(query);
 });
 

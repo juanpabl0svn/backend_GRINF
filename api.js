@@ -5,10 +5,12 @@ const cors = require("cors");
 const morgan = require("morgan");
 const express = require("express");
 
+const sendEmail = require("./email.js");
+
 const app = express();
 
 app.use(cors());
-// app.use(morgan("combined"));
+app.use(morgan("dev"));
 
 const port = process.env.PORT || 3000;
 
@@ -61,7 +63,6 @@ app.get("/activity/area/:area", async (req, res) => {
 
 app.get("/activity", async (req, res) => {
   const activities = await db.getActivities();
-
   res.send(activities);
 });
 
@@ -69,6 +70,10 @@ app.get("/data", async (req, res) => {
   const result = await db.getDataStatistics();
   console.log(result);
   res.send(result);
+});
+
+app.get("/inf", (req, res) => {
+  res.download(__dirname + "/Ejercicio_superheroes.pdf");
 });
 
 //Create a new user
@@ -83,6 +88,13 @@ app.post("/users/:user", async (req, res) => {
     role,
     area
   );
+  const fullName =
+    name.charAt(0).toUpperCase() +
+    name.slice(1) +
+    " " +
+    surname.charAt(0).toUpperCase() +
+    surname.slice(1);
+  sendEmail(email, fullName, username);
   res.send(data);
 });
 

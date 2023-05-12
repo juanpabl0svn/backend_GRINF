@@ -49,11 +49,6 @@ CREATE TABLE IF NOT EXISTS ACTIVITIES (
 	id_area REFERENCES AREAS(id_area)
 );
 
-CREATE TABLE IF NOT EXISTS unpaid_reasons(
-	id_unpaid SERIAL PRIMARY KEY,
-	unpaid_description VARCHAR(1000)
-);
-
 CREATE TABLE IF NOT EXISTS subactivities(
 	cod id_subactivity SERIAL PRIMARY KEY,
 	id_activity INT NOT NULL REFERENCES activities(id_activity),

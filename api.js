@@ -73,7 +73,7 @@ app.get("/data", async (req, res) => {
 });
 
 app.get("/inf", (req, res) => {
-  res.download(__dirname + "/Ejercicio_superheroes.pdf");
+  res.download(__dirname + "/informe_gri_2021.pdf");
 });
 
 //Create a new user

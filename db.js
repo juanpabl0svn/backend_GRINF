@@ -150,7 +150,6 @@ const newSubactivity = async (
   VALUES ('${id_user}','${id_activity}','${description}','${date_start}','${date_end}',${time_worked},${paid_time},${
     time_worked - paid_time
   })`);
-  console.log(query);
 
   return query.rowCount;
 };

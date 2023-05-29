@@ -40,7 +40,6 @@ app.get("/colab/:area", async (req, res) => {
 
 app.get("/areas", async (req, res) => {
   const areas = await db.getAreas();
-  console.log(areas);
   res.send(areas);
 });
 app.get("/activity/:user", async (req, res) => {
@@ -68,7 +67,7 @@ app.get("/activity", async (req, res) => {
 
 app.get("/data", async (req, res) => {
   const result = await db.getDataStatistics();
-  console.log(result);
+
   res.send(result);
 });
 

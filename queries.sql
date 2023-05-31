@@ -1,13 +1,3 @@
--- DROP TABLE IF EXISTS SUBACTIVITY;	
--- DROP TABLE IF EXISTS ACTIVITY_GRI;
--- DROP TABLE IF EXISTS GRI;
--- DROP TABLE IF EXISTS ACTIVITY;
--- DROP TABLE IF EXISTS NOTPAY_REASON;
--- DROP TABLE IF EXISTS STATES;
--- DROP TABLE IF EXISTS AREA_HEAD;
--- DROP TABLE IF EXISTS AREA;
--- DROP TABLE IF EXISTS USERS;
--- DROP TABLE IF EXISTS ROLES;
 CREATE TABLE IF NOT EXISTS ROLES(
 	id_role SERIAL PRIMARY KEY,
 	role_description VARCHAR (50) NOT NULL
@@ -46,17 +36,26 @@ CREATE TABLE IF NOT EXISTS ACTIVITIES (
 	date_start DATE NOT NULL,
 	date_end DATE NOT NULL,
 	id_state INT REFERENCES STATES(id_state) DEFAULT 1,
-	id_area REFERENCES AREAS(id_area)
+	id_area INT REFERENCES AREAS(id_area)
 );
 
 CREATE TABLE IF NOT EXISTS subactivities(
-	cod id_subactivity SERIAL PRIMARY KEY,
+	id_subactivity SERIAL PRIMARY KEY,
 	id_activity INT NOT NULL REFERENCES activities(id_activity),
 	id_user INT NOT NULL REFERENCES USERS(id_user),
 	subactivity_description TEXT,
-	date_start DATE NOT NULL,
-	date_end DATE,
+	actual_date DATE DEFAULT CURRENT_DATE,
 	time_worked INT,
 	paid_time INT,
 	unpaid_time INT
 );
+
+INSERT INTO ROLES (role_description) values ('admin'),('jefe'),('colaborador');
+
+INSERT INTO AREAS (area_description) values ('administracion'),('diseño'),('comercial')
+
+-- password 1234
+INSERT INTO USERS (name,surname,email,username,password,id_role,id_area) 
+VALUES ('miguel','herazo','miguel@gmail.com','mherazo2023','81dc9bdb52d04dc20036dbd8313ed055',1,1)
+
+INSERT INTO states (state_description) VALUES ('activo'),('pendiente'),('inactivo');

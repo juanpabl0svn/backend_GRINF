@@ -135,18 +135,17 @@ app.post("/subactivity/:subactivity", async (req, res) => {
     id_user,
     id_activity,
     description,
-    date_start,
-    date_end,
+    actual_date,
     time_worked,
     paid_time,
   } = JSON.parse(req.params.subactivity);
+  console.log('hola')
 
   const query = await db.newSubactivity(
     id_user,
     id_activity,
     description,
-    date_start,
-    date_end,
+    actual_date,
     time_worked,
     paid_time
   );

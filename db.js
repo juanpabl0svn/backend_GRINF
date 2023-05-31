@@ -140,14 +140,13 @@ const newSubactivity = async (
   id_user,
   id_activity,
   description,
-  date_start,
-  date_end,
+  actual_date,
   time_worked,
   paid_time
 ) => {
   const query = await pool.query(`INSERT INTO
-  subactivities (id_user,id_activity,subactivity_description,date_start,date_end,time_worked,paid_time,unpaid_time)
-  VALUES ('${id_user}','${id_activity}','${description}','${date_start}','${date_end}',${time_worked},${paid_time},${
+  subactivities (id_user,id_activity,subactivity_description,actual_date,time_worked,paid_time,unpaid_time)
+  VALUES ('${id_user}','${id_activity}','${description}','${actual_date}',${time_worked},${paid_time},${
     time_worked - paid_time
   })`);
 
